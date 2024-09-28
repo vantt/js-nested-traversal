@@ -1,5 +1,5 @@
 {
-  "name": "@trantoanvan/nested-traversal",
+  "name": "@trantoanvan/js-nested-traversal",
   "version": "1.0.0",
   "description": "Simplify the handling of deeply nested data structures in JavaScript",
   "main": "dist/bundled.cjs.js",    
@@ -23,6 +23,7 @@
     "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "punycode": "^2.3.1",
     "rollup": "^4.22.4"
   }
 }

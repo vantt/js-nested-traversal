@@ -12,10 +12,6 @@ export default class NestedTraversal {
         return value;
     }
 
-    getValue(path) {
-        return this.#getValueAtPath(path);
-    }
-
     set(path, value) {
         this.#setValueAtPath(path, value);
         return this;
@@ -31,6 +27,14 @@ export default class NestedTraversal {
                 callback(new NestedTraversal(item), key);
             });
         }
+    }
+
+    toJSON() {
+        return this.data;
+    }
+
+    merge(mergeData) {
+        this.data = this.#doMerge(this.data, mergeData);
     }
 
     #getValueAtPath(path) {
@@ -64,21 +68,19 @@ export default class NestedTraversal {
         }
     }
 
-    toJSON() {
-        return this.data;
-    }
-
-    static merge(data1, data2) {
+    #doMerge(data1, data2) {
         const mergedData = { ...data1 };
+
         for (const key in data2) {
             if (typeof data2[key] === 'function') {
                 mergedData[key] = data2[key];
             } else if (typeof data2[key] === 'object' && data2[key] !== null && !Array.isArray(data2[key])) {
-                mergedData[key] = NestedTraversal.merge(mergedData[key] || {}, data2[key]);
+                mergedData[key] = this.#doMerge(mergedData[key] || {}, data2[key]);
             } else {
                 mergedData[key] = data2[key];
             }
         }
+        
         return mergedData;
     }
 }

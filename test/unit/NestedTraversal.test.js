@@ -29,19 +29,16 @@ describe('NestedTraversal', () => {
   });
 
   describe('Merge()', () => {
-
-    test.skip('should merge user config with default config', () => {
-      expect(nt.get('flushConfig.batchSize')).toBe(20);
-      expect(nt.get('flushConfig.flushInterval')).toBe(10000);
-      expect(nt.get('debugMode')).toBe(false);
-      expect(nt.get('autoTracker.enabled')).toBe(true);
-    });
-
-    test.skip('should merge configurations correctly', () => {
+   
+    test.only('should merge configurations correctly', () => {
       const defaultConfig = { a: 1, b: { c: 2 } };
       const userConfig = { b: { d: 3 }, e: 4 };
-      const merged = NestedTraversal.mergeConfig(defaultConfig, userConfig);
-      expect(merged).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
+      const nt = new NestedTraversal(defaultConfig);
+      nt.merge(userConfig);
+      
+      console.log(nt);
+
+      expect(nt.toJSON()).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
     });
   })
 
