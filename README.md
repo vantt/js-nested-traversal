@@ -11,7 +11,6 @@ A powerful and flexible library designed to simplify the handling of deeply nest
 - **Flexible Modification**: Modify nested structures without manually creating intermediate objects.
 - **Merge Capability**: Deeply merge multiple nested objects.
 - **Array Handling**: Seamlessly work with arrays in nested structures.
-- **TypeScript Support**: Full TypeScript support for enhanced developer experience.
 
 ## Installation
 
