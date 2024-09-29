@@ -6,7 +6,7 @@ export default class NestedTraversal {
 
     traverse(path) {
         const value = this.#getValueAtPath(path);
-        return new NestedTraversal(value);        
+        return new NestedTraversal(value);
     }
 
     get(path) {
@@ -18,7 +18,7 @@ export default class NestedTraversal {
         return this;
     }
 
-    forEach(callback) {        
+    forEach(callback) {
         if (Array.isArray(this.data)) {
             this.data.forEach((item, index) => {
                 callback(new NestedTraversal(item), index);
@@ -77,48 +77,48 @@ export default class NestedTraversal {
     }
 
     #setValueAtPath(path, value) {
-    const keys = path.split('.');
-    const last = keys.pop();
-    
-    const obj = keys.reduce((o, i) => {
-        if (o === undefined) return o;
-        
-        const isArrayIndex = !isNaN(i) && i !== '';
-        const nextIsArrayIndex = !isNaN(keys[keys.indexOf(i) + 1]) && keys[keys.indexOf(i) + 1] !== '';
-        
-        if (isArrayIndex) {
-            const index = parseInt(i, 10);
-            if (!Array.isArray(o)) {
-                o = [];
-            }
-            if (o[index] === undefined) {
-                o[index] = nextIsArrayIndex ? [] : {};
-            }
-            return o[index];
-        } else {
-            if (typeof o[i] !== 'object' || o[i] === null) {
-                o[i] = nextIsArrayIndex ? [] : {};
-            }
-            return o[i];
-        }
-    }, this.data);
-    
-    if (!isNaN(last) && last !== '') {
-        const index = parseInt(last, 10);
-        if (!Array.isArray(obj)) {
-            if (Object.keys(obj).length === 0) {
-                // If it's an empty object, we can safely convert it to an array
-                this.#setValueAtPath(keys.join('.'), []);
-                return this.#setValueAtPath(path, value);
+        const keys = path.split('.');
+        const last = keys.pop();
+
+        const obj = keys.reduce((o, i) => {
+            if (o === undefined) return o;
+
+            const isArrayIndex = !isNaN(i) && i !== '';
+            const nextIsArrayIndex = !isNaN(keys[keys.indexOf(i) + 1]) && keys[keys.indexOf(i) + 1] !== '';
+
+            if (isArrayIndex) {
+                const index = parseInt(i, 10);
+                if (!Array.isArray(o)) {
+                    o = [];
+                }
+                if (o[index] === undefined) {
+                    o[index] = nextIsArrayIndex ? [] : {};
+                }
+                return o[index];
             } else {
-                throw new Error('Cannot set an array index on a non-array object');
+                if (typeof o[i] !== 'object' || o[i] === null) {
+                    o[i] = nextIsArrayIndex ? [] : {};
+                }
+                return o[i];
             }
+        }, this.data);
+
+        if (!isNaN(last) && last !== '') {
+            const index = parseInt(last, 10);
+            if (!Array.isArray(obj)) {
+                if (Object.keys(obj).length === 0) {
+                    // If it's an empty object, we can safely convert it to an array
+                    this.#setValueAtPath(keys.join('.'), []);
+                    return this.#setValueAtPath(path, value);
+                } else {
+                    throw new Error('Cannot set an array index on a non-array object');
+                }
+            }
+            obj[index] = value;
+        } else {
+            obj[last] = value;
         }
-        obj[index] = value;
-    } else {
-        obj[last] = value;
     }
-}
 
     #doMerge(data1, data2) {
         const mergedData = { ...data1 };
@@ -132,7 +132,7 @@ export default class NestedTraversal {
                 mergedData[key] = data2[key];
             }
         }
-        
+
         return mergedData;
     }
 }
