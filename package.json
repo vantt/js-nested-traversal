@@ -1,6 +1,6 @@
 {
   "name": "@trantoanvan/js-nested-traversal",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simplify the handling of deeply nested data structures in JavaScript",
   "main": "dist/bundled.cjs.js",    
   "module": "dist/bundled.esm.js", 
