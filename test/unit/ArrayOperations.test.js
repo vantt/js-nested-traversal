@@ -45,11 +45,32 @@ describe('NestedTraversal forEach Tests', () => {
     expect(result).toEqual(['Alice', 'Bob']);
   });
 
+  test('forEach should works with an asynchronous callback', async () => {
+    const result = [];
+    
+    await nt.traverse('users').forEach( async (user) => {     
+      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      result.push(user.get('name'));
+    });
+
+    expect(result).toEqual(['Alice', 'Bob']);
+  });
+
+  test('map() should works with an asynchronous callback', async () => {    
+    const result = await nt.traverse('users').map( async (user) => {     
+      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      return user.get('name');
+    });
+
+    expect(result.toJSON()).toEqual(['Alice', 'Bob']);
+  });
+
   test('forEach should provide correct index for arrays', () => {
     const result = [];
     nt.traverse('users').forEach((user, index) => {
       result.push(`${index}:${user.get('name')}`);
     });
+
     expect(result).toEqual(['0:Alice', '1:Bob']);
   });
 

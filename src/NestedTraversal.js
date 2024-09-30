@@ -18,16 +18,33 @@ export default class NestedTraversal {
         return this;
     }
 
-    forEach(callback) {
+    async  forEach(callback) {
+        const results = [];
         if (Array.isArray(this.data)) {
             this.data.forEach((item, index) => {
-                callback(new this.constructor(item), index);
+                const result = callback(new this.constructor(item), index);
+                results.push(result);
             });
         } else if (typeof this.data === 'object' && this.data !== null) {
-            Object.entries(this.data).forEach(([key, item], index) => {
-                callback(new this.constructor(item), key);
+            Object.entries(this.data).forEach(([key, item]) => {
+                const result = callback(new this.constructor(item), key);
+                results.push(result);
             });
         }
+        return Promise.all(results.map(result => Promise.resolve(result)));
+    }
+
+    async map(callback) {
+        let results;
+        if (Array.isArray(this.data)) {
+            results = this.data.map((item, index) => callback(new this.constructor(item), index));
+        } else if (typeof this.data === 'object' && this.data !== null) {
+            results = Object.entries(this.data).map(([key, item]) => callback(new this.constructor(item), key));
+        } else {
+            results = [];
+        }
+        const resolvedResults = await Promise.all(results.map(result => Promise.resolve(result)));
+        return new this.constructor(resolvedResults);
     }
 
     toJSON() {
