@@ -6,7 +6,7 @@ export default class NestedTraversal {
 
     traverse(path) {
         const value = this.#getValueAtPath(path);
-        return new NestedTraversal(value);
+        return new this.constructor(value);
     }
 
     get(path) {
@@ -21,11 +21,11 @@ export default class NestedTraversal {
     forEach(callback) {
         if (Array.isArray(this.data)) {
             this.data.forEach((item, index) => {
-                callback(new NestedTraversal(item), index);
+                callback(new this.constructor(item), index);
             });
         } else if (typeof this.data === 'object' && this.data !== null) {
             Object.entries(this.data).forEach(([key, item], index) => {
-                callback(new NestedTraversal(item), key);
+                callback(new this.constructor(item), key);
             });
         }
     }
