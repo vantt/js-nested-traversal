@@ -109,16 +109,6 @@ describe('NestedTraversal', () => {
       expect(nt.get('nestedConfig.level1.newValue')).toBe('chainedSet');
     });
 
-    test('should merge() data correctly', () => {
-      const defaultConfig = { a: 1, b: { c: 2 } };
-      const userConfig = { b: { d: 3 }, e: 4 };
-
-      const nt = new NestedTraversal(defaultConfig);
-      nt.merge(userConfig);
-
-      expect(nt.toJSON()).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
-    });
-
     test('set() method preserves mock functions', () => {
       nt = new NestedTraversal();
       const mockForward = jest.fn();
@@ -130,6 +120,16 @@ describe('NestedTraversal', () => {
       // Verify that the mock function is still callable
       platform.forward([]);
       expect(mockForward).toHaveBeenCalled();
+    });
+
+    test('should merge() data correctly', () => {
+      const defaultConfig = { a: 1, b: { c: 2 } };
+      const userConfig = { b: { d: 3 }, e: 4 };
+
+      const nt = new NestedTraversal(defaultConfig);
+      nt.merge(userConfig);
+
+      expect(nt.toJSON()).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
     });
 
     test('merge() preserves mock functions', () => {
@@ -162,6 +162,236 @@ describe('NestedTraversal', () => {
       expect(mockSetup).toHaveBeenCalled();
       expect(mockTransform).toHaveBeenCalled();
       expect(mockForward).toHaveBeenCalled();
+    });
+  });
+
+  describe('NestedTraversal merge', () => {
+    let nt;
+  
+    beforeEach(() => {
+      nt = new NestedTraversal();
+    });
+  
+    describe('Basic merging', () => {
+      test('should merge top-level primitives', () => {
+        const base = { a: 1, b: 2 };
+        const update = { b: 3, c: 4 };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data).toEqual({ a: 1, b: 3, c: 4 });
+      });
+  
+      test('should handle null and undefined values', () => {
+        const base = { a: 1, b: null, c: undefined };
+        const update = { b: 2, c: 3, d: null };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data).toEqual({ a: 1, b: 2, c: 3, d: null });
+      });
+  
+      test('should preserve unmodified properties', () => {
+        const base = { a: 1, b: { x: 1, y: 2 } };
+        const update = { c: 3 };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data).toEqual({ a: 1, b: { x: 1, y: 2 }, c: 3 });
+      });
+    });
+  
+    describe('Array merging', () => {
+      test('should concatenate arrays', () => {
+        const base = { arr: [1, 2, 3] };
+        const update = { arr: [4, 5] };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.arr).toEqual([1, 2, 3, 4, 5]);
+      });
+  
+      test('should handle empty arrays', () => {
+        const base = { arr: [] };
+        const update = { arr: [1, 2] };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.arr).toEqual([1, 2]);
+      });
+  
+      test('should handle arrays with mixed types', () => {
+        const base = { arr: [1, 'two', { three: 3 }] };
+        const update = { arr: [4, { five: 5 }] };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.arr).toEqual([1, 'two', { three: 3 }, 4, { five: 5 }]);
+      });
+    });
+  
+    describe('Nested object merging', () => {
+      test('should merge nested objects recursively', () => {
+        const base = {
+          config: {
+            server: {
+              port: 3000,
+              host: 'localhost'
+            }
+          }
+        };
+        const update = {
+          config: {
+            server: {
+              port: 8080
+            }
+          }
+        };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.config.server).toEqual({
+          port: 8080,
+          host: 'localhost'
+        });
+      });
+  
+      test('should merge objects containing arrays', () => {
+        const base = {
+          settings: {
+            features: ['auth'],
+            plugins: ['basic']
+          }
+        };
+        const update = {
+          settings: {
+            features: ['api'],
+            plugins: ['advanced']
+          }
+        };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.settings).toEqual({
+          features: ['auth', 'api'],
+          plugins: ['basic', 'advanced']
+        });
+      });
+  
+      test('should handle deeply nested structures', () => {
+        const base = {
+          level1: {
+            level2: {
+              level3: {
+                array: [1],
+                value: 'old'
+              }
+            }
+          }
+        };
+        const update = {
+          level1: {
+            level2: {
+              level3: {
+                array: [2],
+                newValue: 'new'
+              }
+            }
+          }
+        };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.level1.level2.level3).toEqual({
+          array: [1, 2],
+          value: 'old',
+          newValue: 'new'
+        });
+      });
+    });
+  
+    describe('Edge cases', () => {
+      test('should handle merging with empty objects', () => {
+        const base = { a: 1 };
+        nt = new NestedTraversal(base);
+        nt.merge({});
+        expect(nt.data).toEqual({ a: 1 });
+      });
+  
+      test('should handle merging with null/undefined', () => {
+        const base = { a: 1 };
+        nt = new NestedTraversal(base);
+        nt.merge(null);
+        expect(nt.data).toEqual({ a: 1 });
+        nt.merge(undefined);
+        expect(nt.data).toEqual({ a: 1 });
+      });
+  
+      test('should handle circular references gracefully', () => {
+        const base = { a: 1 };
+        const circular = { ref: null };
+        circular.ref = circular;
+        
+        nt = new NestedTraversal(base);
+        expect(() => nt.merge(circular)).not.toThrow();
+      });
+  
+      test('should handle function properties', () => {
+        const fn = () => {};
+        const base = { handler: null };
+        const update = { handler: fn };
+        nt = new NestedTraversal(base);
+        nt.merge(update);
+        expect(nt.data.handler).toBe(fn);
+      });
+    });
+  
+    describe('Complex configuration scenarios', () => {
+      test('should handle typical app configuration merge', () => {
+        const defaultConfig = {
+          app: {
+            name: 'MyApp',
+            version: '1.0.0',
+            settings: {
+              theme: 'light',
+              notifications: ['email'],
+              features: {
+                auth: true,
+                api: {
+                  version: 'v1',
+                  endpoints: ['users']
+                }
+              }
+            }
+          }
+        };
+  
+        const userConfig = {
+          app: {
+            settings: {
+              theme: 'dark',
+              notifications: ['sms'],
+              features: {
+                api: {
+                  endpoints: ['products']
+                }
+              }
+            }
+          }
+        };
+  
+        nt = new NestedTraversal(defaultConfig);
+        nt.merge(userConfig);
+  
+        expect(nt.data).toEqual({
+          app: {
+            name: 'MyApp',
+            version: '1.0.0',
+            settings: {
+              theme: 'dark',
+              notifications: ['email', 'sms'],
+              features: {
+                auth: true,
+                api: {
+                  version: 'v1',
+                  endpoints: ['users', 'products']
+                }
+              }
+            }
+          }
+        });
+      });
     });
   });
 });

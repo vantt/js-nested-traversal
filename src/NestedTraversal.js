@@ -25,12 +25,14 @@ export default class NestedTraversal {
                 const result = callback(new this.constructor(item), index);
                 results.push(result);
             });
-        } else if (typeof this.data === 'object' && this.data !== null) {
+        } 
+        else if (typeof this.data === 'object' && this.data !== null) {
             Object.entries(this.data).forEach(([key, item]) => {
                 const result = callback(new this.constructor(item), key);
                 results.push(result);
             });
         }
+
         return Promise.all(results.map(result => Promise.resolve(result)));
     }
 
@@ -138,19 +140,43 @@ export default class NestedTraversal {
     }
 
     #doMerge(data1, data2) {
-        const mergedData = { ...data1 };
-
-        for (const key in data2) {
-            if (typeof data2[key] === 'function') {
-                mergedData[key] = data2[key];
-            } else if (typeof data2[key] === 'object' && data2[key] !== null && !Array.isArray(data2[key])) {
-                mergedData[key] = this.#doMerge(mergedData[key] || {}, data2[key]);
-            } else {
-                mergedData[key] = data2[key];
-            }
+        if (!data1 || !data2) {
+            return data2 || data1;
         }
-
-        return mergedData;
+    
+        // If both are arrays, concatenate them
+        if (Array.isArray(data1) && Array.isArray(data2)) {
+            return [...data1, ...data2];
+        }
+    
+        // If both are objects, merge recursively
+        if (typeof data1 === 'object' && typeof data2 === 'object' && 
+            !Array.isArray(data1) && !Array.isArray(data2)) {
+            const mergedData = { ...data1 };
+            
+            for (const key in data2) {
+                if (data2[key] === undefined) {
+                    continue;
+                }
+                
+                // If property exists in both and both are objects/arrays, merge recursively
+                if (key in data1 && 
+                    data1[key] !== null && 
+                    data2[key] !== null && 
+                    typeof data1[key] === 'object' && 
+                    typeof data2[key] === 'object') {
+                    mergedData[key] = this.#doMerge(data1[key], data2[key]);
+                } else {
+                    // For all other cases, use the value from data2
+                    mergedData[key] = data2[key];
+                }
+            }
+            
+            return mergedData;
+        }
+    
+        // For all other types, use data2's value
+        return data2;
     }
 }
 
