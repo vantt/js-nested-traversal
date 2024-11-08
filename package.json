@@ -1,13 +1,15 @@
 {
   "name": "@trantoanvan/js-nested-traversal",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "Simplify the handling of deeply nested data structures in JavaScript",
   "main": "dist/bundled.cjs.js",    
   "module": "dist/bundled.esm.js", 
   "scripts": {
     "dev": "rollup -c --bundleConfigAsCjs --watch",
     "build": "cross-env NODE_ENV=production rollup -c --bundleConfigAsCjs ",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test"
   },
   "keywords": [],
   "author": "",

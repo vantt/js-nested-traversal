@@ -393,5 +393,62 @@ describe('NestedTraversal', () => {
         });
       });
     });
+
+    describe('A real configuration scenario', () => {
+      test('should handle AutoTracker config merge', () => {
+        const defaultConfig = {
+          app: {
+            name: 'MyApp',
+            version: '1.0.0',
+            settings: {
+              theme: 'light',
+              notifications: ['email'],
+              features: {
+                auth: true,
+                api: {
+                  version: 'v1',
+                  endpoints: ['users']
+                }
+              }
+            }
+          }
+        };
+  
+        const userConfig = {
+          app: {
+            settings: {
+              theme: 'dark',
+              notifications: ['sms'],
+              features: {
+                api: {
+                  endpoints: ['products']
+                }
+              }
+            }
+          }
+        };
+  
+        nt = new NestedTraversal(defaultConfig);
+        nt.merge(userConfig);
+  
+        expect(nt.data).toEqual({
+          app: {
+            name: 'MyApp',
+            version: '1.0.0',
+            settings: {
+              theme: 'dark',
+              notifications: ['email', 'sms'],
+              features: {
+                auth: true,
+                api: {
+                  version: 'v1',
+                  endpoints: ['users', 'products']
+                }
+              }
+            }
+          }
+        });
+      });
+    });
   });
 });

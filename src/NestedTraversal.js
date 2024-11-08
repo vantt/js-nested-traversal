@@ -55,6 +55,7 @@ export default class NestedTraversal {
 
     merge(mergeData) {
         this.data = this.#doMerge(this.data, mergeData);
+        return this;
     }
 
     // Check if path exists
